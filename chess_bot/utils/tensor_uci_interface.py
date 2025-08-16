@@ -70,6 +70,18 @@ def legal_move_mask(legal_moves: chess.Board.legal_moves) -> torch.tensor:
     return move_mask
 
 
+def check_promotion_move(board: chess.Board, move: chess.Move) -> chess.Move:
+    piece = board.piece_at(move.from_square)
+    if piece.piece_type == chess.PAWN:
+        if (
+            chess.square_rank(move.to_square) == 0
+            or chess.square_rank(move.to_square) == 7
+        ):
+            move = chess.Move(move.from_square, move.to_square, promotion=chess.QUEEN)
+
+    return move
+
+
 def pick_tensor_move(
     logits: torch.tensor, legal_move_mask: torch.tensor
 ) -> torch.tensor:
@@ -78,7 +90,6 @@ def pick_tensor_move(
 
     masked_logits = logits.masked_fill(legal_move_mask == 0, -1e9)
     move_probs = F.softmax(masked_logits, dim=-1)
-    print(move_probs.shape)
     move_index = torch.multinomial(move_probs, num_samples=1)
     tensor_move = F.one_hot(move_index, logits.squeeze().shape[-1])
     return tensor_move

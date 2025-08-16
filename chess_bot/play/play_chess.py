@@ -107,6 +107,7 @@ def get_computer_move(board: chess.Board, bot: ChessPolicyNet) -> Optional[chess
     legal_move_mask = interface.legal_move_mask(board.legal_moves)
     tensor_move = interface.pick_tensor_move(logits, legal_move_mask).squeeze()
     uci_move = interface.moves_tensor_to_uci(tensor_move)
+    uci_move = interface.check_promotion_move(board, uci_move)
     return uci_move
 
 
@@ -139,6 +140,7 @@ def main():
                 if selected_square is not None:
                     # A piece is already selected, try to make a move
                     move = chess.Move(selected_square, square)
+                    move = interface.check_promotion_move(board, move)
                     if move in board.legal_moves:
                         board.push(move)
                         player_turn = False  # Switch to computer's turn
