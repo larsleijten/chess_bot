@@ -1,5 +1,6 @@
 import chess
 import torch
+import torch.nn.functional as F
 
 
 def board_to_tensor(board: chess.Board) -> torch.tensor:
@@ -44,7 +45,7 @@ def board_to_tensor(board: chess.Board) -> torch.tensor:
 
 
 def moves_uci_to_tensor(uci_move: chess.Move) -> torch.tensor:
-    move_index = uci_move.from_square * 64 + uci_move.to_square
+    move_index = get_move_index(uci_move)
     tensor_move = torch.zeros(4096, dtype=torch.float32)
     tensor_move[move_index] = 1.0
     return tensor_move
@@ -58,6 +59,33 @@ def moves_tensor_to_uci(tensor_move: torch.tensor) -> chess.Move:
     uci_move = chess.Move(from_square_index, to_square_index)
 
     return uci_move
+
+
+def legal_move_mask(legal_moves: chess.Board.legal_moves) -> torch.tensor:
+    move_mask = torch.zeros(4096, dtype=torch.float32)
+    for move in legal_moves:
+        move_index = get_move_index(move)
+        move_mask[move_index] = 1.0
+
+    return move_mask
+
+
+def pick_tensor_move(
+    logits: torch.tensor, legal_move_mask: torch.tensor
+) -> torch.tensor:
+    if not legal_move_mask.any():
+        return None  # No legal moves available
+
+    masked_logits = logits.masked_fill(legal_move_mask == 0, -1e9)
+    move_probs = F.softmax(masked_logits, dim=-1)
+    print(move_probs.shape)
+    move_index = torch.multinomial(move_probs, num_samples=1)
+    tensor_move = F.one_hot(move_index, logits.squeeze().shape[-1])
+    return tensor_move
+
+
+def get_move_index(uci_move: chess.Move) -> int:
+    return uci_move.from_square * 64 + uci_move.to_square
 
 
 def replace_digits_with_zeros(input_string: str) -> str:
