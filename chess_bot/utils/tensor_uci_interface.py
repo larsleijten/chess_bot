@@ -44,11 +44,20 @@ def board_to_tensor(board: chess.Board) -> torch.tensor:
 
 
 def moves_uci_to_tensor(uci_move: chess.Move) -> torch.tensor:
-    tensor_move = uci_move
+    move_index = uci_move.from_square * 64 + uci_move.to_square
+    tensor_move = torch.zeros(4096, dtype=torch.float32)
+    tensor_move[move_index] = 1.0
+    return tensor_move
 
 
 def moves_tensor_to_uci(tensor_move: torch.tensor) -> chess.Move:
-    uci_move = tensor_move
+    move_index = int(torch.argmax(tensor_move).item())
+
+    from_square_index = move_index // 64
+    to_square_index = move_index % 64
+    uci_move = chess.Move(from_square_index, to_square_index)
+
+    return uci_move
 
 
 def replace_digits_with_zeros(input_string: str) -> str:
