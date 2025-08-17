@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Create Move Database",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/chess_bot/preprocessing/create_move_database.py",
+            "args": [
+                "--pgn_zst_file",
+                "/mnt/c/Users/z515232/Documents/hobby_websites/chess_bot/lichess_db_standard_rated_2016-05.pgn.zst",
+                "--output_dir",
+                "/mnt/c/Users/z515232/Documents/hobby_websites/chess_bot/datasets"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {},
+            "stopOnEntry": false,
+            "justMyCode": true
+        },
+        {
+            "name": "Train Chess Bot",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/chess_bot/train/train.py",
+            "args": [
+                "--data_dir",
+                "/mnt/c/Users/z515232/Documents/hobby_websites/chess_bot/datasets/white",
+                "--checkpoint_path",
+                "/mnt/c/Users/z515232/Documents/hobby_websites/chess_bot/train/white.pth",
+                "--epochs",
+                "1",
+                "--batch_size",
+                "16"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "env": {},
+            "stopOnEntry": false,
+            "justMyCode": true
+        }
+    ]
+}

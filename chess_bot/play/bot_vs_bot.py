@@ -1,12 +1,13 @@
 import pygame
 import chess
 import time
+import torch
 from typing import Optional, Tuple
-from chess_bot.bot.cnn_chessbot import ChessPolicyNet
+from chess_bot.bot.cnn_chessbot import ChessPolicyNet, ChessUNET
 import chess_bot.utils.tensor_uci_interface as interface
 
 # --- Configurable Parameters ---
-MOVE_DELAY_MS = 100  # Set the delay between moves in milliseconds
+MOVE_DELAY_MS = 0  # Set the delay between moves in milliseconds
 
 # --- Pygame Setup ---
 SCREEN_WIDTH = 600
@@ -101,8 +102,14 @@ def main():
     board = chess.Board()
 
     # Initialize two separate bot instances
-    bot_white = ChessPolicyNet()
-    bot_black = ChessPolicyNet()
+    bot_white = ChessUNET()
+
+    bot_black = ChessUNET()
+    bot_black.load_state_dict(
+        torch.load(
+            "/mnt/c/Users/z515232/Documents/hobby_websites/chess_bot/train/unet_black.pth"
+        )
+    )
 
     running = True
     while running and not board.is_game_over():

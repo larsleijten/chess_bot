@@ -1,8 +1,9 @@
 import pygame
 import chess
 import random
+import torch
 from typing import Optional, Tuple
-from chess_bot.bot.cnn_chessbot import CNNChessbot, ChessPolicyNet
+from chess_bot.bot.cnn_chessbot import ChessUNET, ChessPolicyNet
 import chess_bot.utils.tensor_uci_interface as interface
 
 
@@ -123,7 +124,12 @@ def main():
     )
 
     board = chess.Board()
-    bot = ChessPolicyNet()
+    bot = ChessUNET()
+    bot.load_state_dict(
+        torch.load(
+            "/mnt/c/Users/z515232/Documents/hobby_websites/chess_bot/train/unet_black.pth"
+        )
+    )
     selected_square: Optional[int] = None
     player_turn = True
 
